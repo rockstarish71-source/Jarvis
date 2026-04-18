@@ -62,13 +62,11 @@ def speak(text):
 
 def take_command():
     if not SR_AVAILABLE:
-        print("Speech recognition not available in this environment.")
         return ""
     
     try:
         r = sr.Recognizer()
         with sr.Microphone() as source:
-            print("Listening...")
             r.adjust_for_ambient_noise(source)
             audio = r.listen(source)
         try:
@@ -76,9 +74,8 @@ def take_command():
             return command.lower()
         except Exception:
             return ""
-    except Exception as e:
-        # Microphone not available in this environment
-        print(f"Audio input not available: {e}")
+    except Exception:
+        # Microphone not available in this environment - silently return empty
         return ""
 
 
@@ -132,13 +129,17 @@ def handle_command(command, speak_response=False, api_key=None):
 
 
 def run_jarvis():
+    """CLI mode - only for running as a standalone script, not for Streamlit"""
     speak("System is online")
-    while True:
-        command = take_command()
-        if WAKE_WORD in command:
-            response = handle_command(command, speak_response=True)
-            if "shutting down" in response.lower():
-                break
+    # Note: This infinite loop is disabled for Streamlit compatibility
+    # Use the Streamlit app (app.py) for the interactive interface instead
+    # while True:
+    #     command = take_command()
+    #     if WAKE_WORD in command:
+    #         response = handle_command(command, speak_response=True)
+    #         if "shutting down" in response.lower():
+    #             break
+    print("Use 'streamlit run app.py' for the interactive interface")
 
 if __name__ == "__main__":
     # CLI mode - only run when executed directly, not when imported by Streamlit
