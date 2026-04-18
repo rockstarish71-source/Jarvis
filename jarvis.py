@@ -127,6 +127,10 @@ def run_jarvis():
             if "shutting down" in response.lower():
                 break
 
-
 if __name__ == "__main__":
-    run_jarvis()
+    # CLI mode - only run when executed directly, not when imported by Streamlit
+    try:
+        run_jarvis()
+    except KeyboardInterrupt:
+        print("\nShutting down...")
+
