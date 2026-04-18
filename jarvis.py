@@ -1,6 +1,4 @@
-import contextlib
 import google.generativeai as genai
-SR_AVAILABLE = False
 try:
     import pyttsx3
     PYTTSX3_AVAILABLE = True
@@ -58,25 +56,9 @@ def speak(text):
 
 
 def take_command():
-    try:
-        import speech_recognition as sr
-    except Exception:
-        return ""
-
-    try:
-        r = sr.Recognizer()
-        with open(os.devnull, "w") as devnull:
-            with contextlib.redirect_stderr(devnull), contextlib.redirect_stdout(devnull):
-                with sr.Microphone() as source:
-                    r.adjust_for_ambient_noise(source)
-                    audio = r.listen(source)
-        try:
-            command = r.recognize_google(audio)
-            return command.lower()
-        except Exception:
-            return ""
-    except Exception:
-        return ""
+    # Speech recognition is not supported in Streamlit deployments.
+    # This stub prevents PyAudio / microphone access in headless environments.
+    return ""
 
 
 def ask_ai(prompt, api_key=None):

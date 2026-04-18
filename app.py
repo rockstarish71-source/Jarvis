@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
-from jarvis import handle_command, PYTTSX3_AVAILABLE, SR_AVAILABLE
+from jarvis import handle_command, PYTTSX3_AVAILABLE
 
 BASE_DIR = Path(__file__).resolve().parent
 ENV_PATH = BASE_DIR / ".env"
@@ -44,8 +44,6 @@ command = st.text_area(
 use_speech = st.checkbox("Speak response", value=False, disabled=not PYTTSX3_AVAILABLE)
 if not PYTTSX3_AVAILABLE:
     st.info("Text-to-speech is not available in this environment.")
-if not SR_AVAILABLE:
-    st.warning("Speech recognition is not available. Use text input instead.")
 
 if st.button("Run Jarvis"):
     if not command.strip():
