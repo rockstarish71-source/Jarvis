@@ -1,5 +1,9 @@
 import google.generativeai as genai
-import speech_recognition as sr
+try:
+    import speech_recognition as sr
+    SR_AVAILABLE = True
+except ImportError:
+    SR_AVAILABLE = False
 try:
     import pyttsx3
     PYTTSX3_AVAILABLE = True
@@ -57,15 +61,24 @@ def speak(text):
 
 
 def take_command():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("Listening...")
-        r.adjust_for_ambient_noise(source)
-        audio = r.listen(source)
+    if not SR_AVAILABLE:
+        print("Speech recognition not available in this environment.")
+        return ""
+    
     try:
-        command = r.recognize_google(audio)
-        return command.lower()
-    except Exception:
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            print("Listening...")
+            r.adjust_for_ambient_noise(source)
+            audio = r.listen(source)
+        try:
+            command = r.recognize_google(audio)
+            return command.lower()
+        except Exception:
+            return ""
+    except Exception as e:
+        # Microphone not available in this environment
+        print(f"Audio input not available: {e}")
         return ""
 
 
