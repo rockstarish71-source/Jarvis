@@ -1,6 +1,10 @@
 import google.generativeai as genai
 import speech_recognition as sr
-import pyttsx3
+try:
+    import pyttsx3
+    PYTTSX3_AVAILABLE = True
+except ImportError:
+    PYTTSX3_AVAILABLE = False
 try:
     import pywhatkit
     PYWHATKIT_AVAILABLE = True
@@ -32,13 +36,14 @@ def get_gemini_model(api_key=None):
     return genai.GenerativeModel('gemini-1.5-flash')
 
 
-try:
-    import pyttsx3
-    PYTTSX3_AVAILABLE = True
-    engine = pyttsx3.init()
-    engine.setProperty("rate", 165)
-except ImportError:
-    PYTTSX3_AVAILABLE = False
+if PYTTSX3_AVAILABLE:
+    try:
+        engine = pyttsx3.init()
+        engine.setProperty("rate", 165)
+    except Exception:
+        PYTTSX3_AVAILABLE = False
+        engine = None
+else:
     engine = None
 
 WAKE_WORD = "rockcee"
