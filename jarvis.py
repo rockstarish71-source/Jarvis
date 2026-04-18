@@ -1,0 +1,110 @@
+import google.generativeai as genai
+import speech_recognition as sr
+import pyttsx3
+import pywhatkit
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent
+ENV_PATH = BASE_DIR / ".env"
+ALT_ENV_PATH = BASE_DIR / ".evn"
+
+if ENV_PATH.exists():
+    load_dotenv(dotenv_path=ENV_PATH)
+elif ALT_ENV_PATH.exists():
+    load_dotenv(dotenv_path=ALT_ENV_PATH)
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+
+def get_gemini_model(api_key=None):
+    api_key = api_key or GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise EnvironmentError(
+            "Gemini API key is not set. Set GEMINI_API_KEY in the environment or pass api_key explicitly."
+        )
+    genai.configure(api_key=api_key)
+    return genai.GenerativeModel('gemini-1.5-flash')
+
+
+engine = pyttsx3.init()
+engine.setProperty("rate", 165)
+
+WAKE_WORD = "rockcee"
+
+
+def speak(text):
+    print("Jarvis:", text)
+    engine.say(text)
+    engine.runAndWait()
+
+
+def take_command():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.adjust_for_ambient_noise(source)
+        audio = r.listen(source)
+    try:
+        command = r.recognize_google(audio)
+        return command.lower()
+    except Exception:
+        return ""
+
+
+def ask_ai(prompt, api_key=None):
+    model = get_gemini_model(api_key)
+    response = model.generate_content(prompt)
+    return response.text
+
+
+def handle_command(command, speak_response=False, api_key=None):
+    if not command:
+        return "No command received."
+
+    normalized = command.lower().strip()
+    result = ""
+
+    if WAKE_WORD in normalized:
+        normalized = normalized.replace(WAKE_WORD, "").strip()
+        result = "System is online. Welcome back Rockstar"
+
+        if "stop" in normalized:
+            result = "Shutting down"
+        elif "open google" in normalized:
+            os.system("open https://www.google.com")
+            result = "Opening Google"
+        elif "play" in normalized:
+            pywhatkit.playonyt(normalized)
+            result = "Playing on YouTube"
+        else:
+            result = ask_ai(normalized, api_key=api_key)
+    else:
+        if "open google" in normalized:
+            os.system("open https://www.google.com")
+            result = "Opening Google"
+        elif "play" in normalized:
+            pywhatkit.playonyt(normalized)
+            result = "Playing on YouTube"
+        else:
+            result = ask_ai(normalized, api_key=api_key)
+
+    if speak_response:
+        speak(result)
+
+    return result
+
+
+def run_jarvis():
+    speak("System is online")
+    while True:
+        command = take_command()
+        if WAKE_WORD in command:
+            response = handle_command(command, speak_response=True)
+            if "shutting down" in response.lower():
+                break
+
+
+if __name__ == "__main__":
+    run_jarvis()
