@@ -2,5 +2,5 @@ python-dotenv
 google-generativeai
 streamlit
 speechrecognition
-pyttsx3
-pywhatkit
+# pyttsx3  # Optional for text-to-speech, not available in headless environments
+# pywhatkit  # Optional for YouTube playback, requires GUI

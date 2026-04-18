@@ -1,7 +1,11 @@
 import google.generativeai as genai
 import speech_recognition as sr
 import pyttsx3
-import pywhatkit
+try:
+    import pywhatkit
+    PYWHATKIT_AVAILABLE = True
+except ImportError:
+    PYWHATKIT_AVAILABLE = False
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -28,16 +32,23 @@ def get_gemini_model(api_key=None):
     return genai.GenerativeModel('gemini-1.5-flash')
 
 
-engine = pyttsx3.init()
-engine.setProperty("rate", 165)
+try:
+    import pyttsx3
+    PYTTSX3_AVAILABLE = True
+    engine = pyttsx3.init()
+    engine.setProperty("rate", 165)
+except ImportError:
+    PYTTSX3_AVAILABLE = False
+    engine = None
 
 WAKE_WORD = "rockcee"
 
 
 def speak(text):
     print("Jarvis:", text)
-    engine.say(text)
-    engine.runAndWait()
+    if PYTTSX3_AVAILABLE and engine:
+        engine.say(text)
+        engine.runAndWait()
 
 
 def take_command():
@@ -76,8 +87,11 @@ def handle_command(command, speak_response=False, api_key=None):
             os.system("open https://www.google.com")
             result = "Opening Google"
         elif "play" in normalized:
-            pywhatkit.playonyt(normalized)
-            result = "Playing on YouTube"
+            if PYWHATKIT_AVAILABLE:
+                pywhatkit.playonyt(normalized)
+                result = "Playing on YouTube"
+            else:
+                result = "YouTube playback not available in this environment."
         else:
             result = ask_ai(normalized, api_key=api_key)
     else:
@@ -85,8 +99,11 @@ def handle_command(command, speak_response=False, api_key=None):
             os.system("open https://www.google.com")
             result = "Opening Google"
         elif "play" in normalized:
-            pywhatkit.playonyt(normalized)
-            result = "Playing on YouTube"
+            if PYWHATKIT_AVAILABLE:
+                pywhatkit.playonyt(normalized)
+                result = "Playing on YouTube"
+            else:
+                result = "YouTube playback not available in this environment."
         else:
             result = ask_ai(normalized, api_key=api_key)
 
